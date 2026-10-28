@@ -111,6 +111,16 @@ contact rico@rtech-consulting.com.
 - `tiers/`: tier notes
 - `docs/images/`: README images
 
+## How it was built
+
+Quote Kit started on 2026-07-15 as an AI skill that turned a job description
+into a numbered quote. An internal review on 2026-08-11 found it never refused
+a job it could not price. It was then reworked against three rounds of
+simulated buyers, its money math moved into a tested script, and a review by a
+second model family fixed three defects that could put a wrong quote in front
+of a customer. The build story has the dates, the decisions and what did not
+work: [docs/BUILD-STORY.md](docs/BUILD-STORY.md).
+
 ## Project status
 
 Experimental. Version 1.1.5. The install has been checked in the Claude app and
