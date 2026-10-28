@@ -19,6 +19,8 @@ function filesUnder(directory) {
   const result = [];
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const absolute = path.join(directory, entry.name);
+    // A git checkout's own metadata is not part of the shipped package.
+    if (entry.isDirectory() && entry.name === ".git" && directory === kitRoot) continue;
     if (entry.isDirectory()) result.push(...filesUnder(absolute));
     else result.push(absolute);
   }
@@ -124,7 +126,7 @@ for (const field of brandingFields) {
   check(installer.includes(field), `installer branding interview does not collect required template field: ${field}`);
 }
 
-check(!/<script\s+[^>]*src=|<link\s+[^>]*href=|\bfetch\s*\(|XMLHttpRequest/i.test(form), "form.html must stay offline and self-contained");
+check(!/<script\s+[^>]*src=|<link\s+[^>]*href=(?!["']?data:)|\bfetch\s*\(|XMLHttpRequest/i.test(form), "form.html must stay offline and self-contained");
 const scriptBlocks = [...form.matchAll(/<script>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
 check(scriptBlocks.length === 1, "form.html must contain exactly one inline script block");
 if (scriptBlocks.length === 1) {

@@ -125,9 +125,7 @@ work: [docs/BUILD-STORY.md](docs/BUILD-STORY.md).
 
 Experimental. Version 1.1.5. The install has been checked in the Claude app and
 in Codex; the claude.ai web install has not been tested. The test suite (13
-tests) passes. The package verifier `verify-kit.mjs` currently flags
-`form.html` as not fully self-contained: its check matches the inline
-`data:` favicon `<link>`, which loads nothing from the network.
+tests) passes, and the package verifier `node verify-kit.mjs` passes.
 
 ## Credits
 
