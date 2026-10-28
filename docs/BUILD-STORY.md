@@ -81,9 +81,8 @@ harnesses, a start-here card, a refusal rule, and an acceptance checklist.
   `form.html` against a minimal DOM stand-in, to prove export refuses a quote
   that is no longer valid.
 - `verify-kit.mjs` checks the package's structure and fails if `kit.json`
-  drifts from `VERSION`. Since 1.1.5 it also reports a false failure: its
-  "form must stay offline" rule matches the inline `data:` favicon added in
-  that release.
+  drifts from `VERSION`. Its "form must stay offline" rule allows the inline
+  `data:` favicon, and it skips a git checkout's `.git` folder.
 
 ## What did not work, and what changed
 
