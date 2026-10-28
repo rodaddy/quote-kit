@@ -1,49 +1,47 @@
 # Quote Kit
 
-An AI skill kit that turns a plain-words job description into a branded,
-sequentially numbered quote with checked math and a ledger entry.
+Turn a plain-words job description into a branded, sequentially numbered quote
+whose money math is checked by a script, not guessed by the AI.
 
-> Portfolio piece. Source shown for review only; not licensed for use. See LICENSE.
+![Licence: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/licence-PolyForm%20Noncommercial%201.0.0-blue)
+![Language: JavaScript](https://img.shields.io/badge/language-JavaScript%20(Node%2022%2B)-f7df1e)
 
-## What it does
+![Quote Kit: a job described in plain words becomes a branded, numbered quote](docs/images/hero.jpg)
 
-The owner describes a job in plain words ("quote Bob for a fence, 120 feet at
-$40"). The kit returns a quote that carries the business's logo and colors, the
-next quote number from a running ledger, line items priced from the owner's own
-rate card, money math computed and double-checked by a script, and a print-ready
-PDF. The owner reviews it and sends it.
+## What it is
 
-## The problem
+An AI skill kit for small trades and service businesses. The owner describes a
+job in plain words ("quote Bob for a fence, 120 feet at $40") or fills in the
+offline form. The kit returns a quote that carries the business's logo and
+colours, the next quote number from a running ledger, line items priced from
+the owner's own rate card, money math computed and double-checked by a script,
+and a print-ready page the owner saves as PDF. The owner reviews it and sends
+it.
 
-Small trades and service businesses quote by hand from memory: numbers get
-reused, math slips, exclusions get left off, and a quote that should say "I
-can't price this yet" goes out with a guess in it. An AI chat can write a quote,
-but on its own it guesses at prices and arithmetic and keeps no durable
-numbering.
+## Why it exists
+
+Small businesses often quote by hand from memory: quote numbers get reused,
+arithmetic slips, exclusions get left off, and a quote that should say "I can't
+price this yet" goes out with a guess in it. An AI chat can write a quote, but
+on its own it guesses at prices and arithmetic and keeps no durable numbering.
+This kit lets the owner produce a correct, consistent quote in minutes and keep
+their judgment on price and scope.
 
 ## How it works
 
-The kit is a folder of markdown: a self-adapting `installer.md` that any host AI
-reads to install the kit for its own platform (running a branding and pricing
-interview on the way), and a `quotes` skill with its workflows, rate card,
-service descriptions, quote template and an offline HTML form. The AI handles the
-conversation and judgment. Everything that must be exact runs in one
-dependency-free Node script, `skills/quotes/scripts/quote-kit.mjs`, which does
-money math in integer cents and returns equality checks for lines, subtotal,
-tax, total, deposit and balance, and which reserves quote numbers by appending
-to the ledger under a file lock. Where the host cannot run Node (a bare chat),
-the kit still produces quote text and says plainly that the checks are advisory.
+![How it works: owner input through the quotes skill, quote-kit.mjs and the ledger to a branded quote](docs/images/how-it-works.jpg)
 
-```mermaid
-flowchart LR
-  O[Owner: job in plain words] --> AI[Host AI + quotes skill]
-  AI -- rate card, services --> AI
-  AI -- calculate --> S[quote-kit.mjs]
-  AI -- ledger-reserve --> S
-  S --> L[(quotes-ledger.md)]
-  AI --> Q[Branded quote + PDF]
-  Q --> O
-```
+`installer.md` is a self-adapting installer: the host AI reads it, runs a short
+branding and pricing interview, and installs the `quotes` skill for its
+platform. The skill holds the rate card, per-service descriptions, the quote
+template, the offline form and four workflows (new quote, change order, ledger
+update, render quote). The AI handles the conversation and the judgment.
+Everything that must be exact runs in one dependency-free Node script,
+`skills/quotes/scripts/quote-kit.mjs`: it does money math in integer cents,
+returns equality checks for lines, subtotal, tax, total, deposit and balance,
+and reserves quote numbers by appending to the ledger under a file lock. Where
+the host cannot run Node (a bare chat), the kit still writes the quote and says
+plainly that the checks are advisory.
 
 ## Features
 
@@ -51,57 +49,80 @@ flowchart LR
   service's pricing questions gets "I can't quote this yet", a list of what is
   missing, and no quote number spent.
 - Sequential, locked numbering: two chats cannot take the same number, and an
-  abandoned prepared quote is voided rather than leaving a hole.
+  abandoned prepared quote is voided rather than leaving a gap.
 - Exclusions and Assumptions on every quote, from the owner's per-service lists.
 - Minimum charge and margin floor checked before the owner sees the total.
 - Deposit and balance computed and re-added to equal the total.
-- Sales tax asked per quote where it depends on the job, never decided by the AI.
-- Change orders numbered as children of the accepted quote (`0068-A`), inheriting
-  its terms and tax treatment.
+- Sales tax asked per quote where it depends on the job, never decided by the
+  AI.
+- Change orders numbered as children of the accepted quote (`0068-A`),
+  inheriting its terms and tax treatment.
 - Options shown as alternatives on one quote number; their totals never add.
 - Pasted client emails are treated as data; text addressed to the AI is quoted
   back as suspicious.
 - Offline `form.html` with dynamic line items and live math.
 - Four worked examples in `examples/`, including one the kit refused to price.
 
-## Stack
+## Run it locally (for review)
 
-- Markdown skills and workflows, readable by any AI host
-- Plain Node 22+ (`.mjs`, no packages, no build step) for money and ledger logic
-- A single self-contained HTML form
-- `node:test` suite in `tests/`
+Requires Node 22 or newer. No packages, no build step.
 
-## Status
+```sh
+git clone https://github.com/rodaddy/quote-kit.git
+cd quote-kit
 
-Experimental. Version 1.1.5. Install verified in the Claude app and Codex on
-2026-08-12; claude.ai web install not tested. `tests/` passes (13 tests). The
-package verifier `verify-kit.mjs` currently flags `form.html` as not fully
-self-contained.
+# Money, ledger and form tests
+node --test tests/*.test.mjs
+
+# Price a two-line job; the script prints totals and its own equality checks
+echo '{"items":[{"description":"Patio","quantity":"480","unit":"square feet","unitPrice":"22.00"},
+  {"description":"Dry well","quantity":"1","unit":"job","unitPrice":"1850.00"}],
+  "taxRatePercent":"0","deposit":{"type":"percent","value":"50"}}' \
+  | node skills/quotes/scripts/quote-kit.mjs calculate
+
+# The intake form opens offline in any browser
+open skills/quotes/templates/quote/form.html
+```
+
+![Real output of quote-kit.mjs calculate: totals, deposit and equality checks, then a refusal](docs/images/terminal.png)
+
+*`quote-kit.mjs calculate` on a two-line job (JSON trimmed by `jq` to the
+customer-facing fields and the checks), then the same script refusing a line
+item with no unit.*
+
+The other subcommands (`ledger-next`, `ledger-reserve`, `ledger-reserve-change`,
+`ledger-status`, `ledger-expire`, `ledger-migrate`, `ledger-unlock`) are listed
+in `skills/quotes/scripts/README.md`. To use the kit itself, open
+`START-HERE.md` in your AI assistant and follow the installer.
+
+**Licence:** free for personal and non-commercial use with credit; commercial
+use needs a licence. See [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0) or
+contact rico@rtech-consulting.com.
 
 ## Repository layout
 
-- `installer.md`, `START-HERE.md` — the self-adapting installer
-- `OPERATIONS-MANUAL.md` — plain-language guide to using the kit
-- `skills/quotes/` — the skill, workflows, rate card, services, template, form,
+- `installer.md`, `START-HERE.md`: the self-adapting installer
+- `OPERATIONS-MANUAL.md`: plain-language guide to using the kit
+- `skills/quotes/`: the skill, workflows, rate card, services, template, form,
   ledger and script
-- `examples/` — four complete worked runs
-- `tests/`, `verify-kit.mjs` — money, ledger and form tests, and the package
+- `examples/`: four complete worked runs
+- `tests/`, `verify-kit.mjs`: money, ledger and form tests, and the package
   verifier
-- `tiers/` — tier notes
+- `tiers/`: tier notes
+- `docs/images/`: README images
 
-## Running it locally (for reviewers)
+## Project status
 
-```sh
-node --test tests/*.test.mjs
-```
+Experimental. Version 1.1.5. The install has been checked in the Claude app and
+in Codex; the claude.ai web install has not been tested. The test suite (13
+tests) passes. The package verifier `verify-kit.mjs` currently flags
+`form.html` as not fully self-contained: its check matches the inline
+`data:` favicon `<link>`, which loads nothing from the network.
 
-`quote-kit.mjs calculate` reads a JSON job on stdin; the tests show the input
-shape.
+## Credits
 
-## Screenshots
-
-None.
+Built on plain Node.js (`node:test`, `node:fs`) with no third-party packages.
 
 ## Author
 
-Rico Rojas, rico@rtech-consulting.com, https://rico-rojas.com
+Rico Rojas, https://rico-rojas.com
