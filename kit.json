@@ -1,0 +1,9 @@
+{
+  "name": "quote-kit",
+  "version": "1.1.5",
+  "requirements": {
+    "runtimes": {
+      "node": ">=22.0.0"
+    }
+  }
+}

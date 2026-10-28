@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote — Fill the Form</title>
+<style>
+  :root {
+    --ink: #1f2328;
+    --muted: #5b636b;
+    --line: #d9dde1;
+    --bg: #f4f2ec;         /* warm neutral, brand-safe */
+    --card: #ffffff;
+    --accent: #6b1f2a;     /* brand-neutral placeholder; the quote header uses YOUR brand colors */
+    --accent-soft: #f0e7e8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { font-size: 24px; margin: 0 0 4px; }
+  header p { color: var(--muted); margin: 0 0 24px; }
+  fieldset {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--card);
+    padding: 18px 18px 6px;
+    margin: 0 0 20px;
+  }
+  legend { font-weight: 600; padding: 0 8px; color: var(--accent); }
+  label { display: block; font-weight: 600; margin: 14px 0 4px; font-size: 14px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
+  input, textarea, select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line);
+    border-radius: 8px; font: inherit; color: var(--ink); background: #fff;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+  /* Line-item rows */
+  .items-head, .item-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 90px 110px 110px 34px;
+    gap: 8px; align-items: end;
+  }
+  .items-head { margin: 8px 0 2px; }
+  .items-head span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .item-row { margin: 8px 0; }
+  .item-row label { margin: 0; }
+  .item-row .line-total {
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+    background: #faf9f6; color: var(--ink); text-align: right; min-height: 41px;
+  }
+  .remove {
+    border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    height: 41px; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1;
+  }
+  .add-item {
+    border: 1px dashed var(--accent); background: var(--accent-soft); color: var(--accent);
+    border-radius: 8px; padding: 10px 14px; cursor: pointer; font: inherit; font-weight: 600;
+    margin: 6px 0 4px;
+  }
+
+  .totals { margin: 16px 0 4px; text-align: right; font-size: 15px; }
+  .totals div { margin: 4px 0; }
+  .totals .grand { font-size: 18px; font-weight: 700; color: var(--accent); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 24px; }
+  button.primary, button.ghost {
+    font: inherit; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--accent); border-radius: 8px; padding: 11px 18px;
+  }
+  .primary { background: var(--accent); color: #fff; }
+  .ghost { background: #fff; color: var(--accent); }
+  #status { color: var(--muted); font-size: 14px; align-self: center; }
+  h2.out { font-size: 18px; margin: 28px 0 8px; }
+  #output {
+    width: 100%; min-height: 320px; padding: 16px; border: 1px solid var(--line);
+    border-radius: 10px; background: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px; white-space: pre-wrap;
+  }
+  footer { color: var(--muted); font-size: 13px; margin-top: 32px; }
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAKBUlEQVRYw62Xe3Bd1XXGf3vvc5+60pV09X5ZJsgvyTZ2QrBdwLFjHKdTTMm0tMHYYYa2lMQhQ5OhBcIkaTLudMiENiWPoUkhMyTDxAXHhUB4ZPDYZDAmGPx+yJJiISHJeli60tW995yz9+ofsoyNCOWPrpk9c2bOOWt9+/vWWnsv+Ij2n99s58zz2zncAUOPLeEPv9pifgxqN6jBF+4w8pMYAvS+8jV2PrTmo7pFf9jLRx5YwOnfbMe9eicHdx4jkihT1Q9tNcXisNfQUGrv/Day+b+Q2uYyy7zFZvrtfzQ6nlbBQDciO+jZ8wCPfWvphwJQsw+//PoyNv/N7YTW0n/6jIqYGFHPqojkVVSySk+dpuymQyGdfw+9z0HDre1n39r3iGeMabz2hu3E9x6mchOoW+DgF03BNahiGJN8oCUIjeT9KRZ0XCEozS8ffZq/+tZ+ALxZAFd84gpi8+4hANLp16W2YgymTgi5PghDyJUARAn12olg0d8ef/6Zv9y9qw8lilsni4eWrmnfTVx+Qgmv0F6Ri0s5cUmS1uUQW8w7A0D9RgDK5++/yMBFAKV15QBEgFhmXhT8JHhpnNdEIdbhJhuv7X/qU9cfPzbU8vq+Id7aO0XUV1aAB18/qK/e2H/T2s/23LTkqkMDlfUVr1Kq95HQh4maXkiN6/LUNFAEiJUm5krw+Bfnc9vNKR0UxXX2JXeGzr/Rt0qmpsL40GCerlNZOg9nOf9u4JJoV4PnRTWgFNYKQ/h2EktlfYlpW5GhbUk59Y1JylKmmPBCEPPsoo9l/4IY+olf4LZ+/+jlDAS+xZgpzKIySkbDhn/7flfs+JuTEkc7Ba4ETTmerlZRrbXSzgk4EARPQZOOGiWayYFQjg702f3P9eJQuoBEOlaW6q/es6iOGge9WSQsmyuBVgoamqG1lPihCT8ZxGiiaDMm4hlEA4gITkCsoAGZpVBALDjlSGitGlXcU0qBhnN+ECaCqI4k4j71pTCVwHjFuQDEKVAWlEME5RkwoJw4xL2nlbqw5KILQSmFUgpRIAqcgB9aClg0qIhRCOjZv6zI3D4gCFgLYYgTB3JJglxwPBtdazBGgVYorXECRWeZsgHnQ58RW0BKI1y/dT6eMjg7AxIUKMUl8d9jwIlAYCGwOCvI7FdKzSJEK3BOmBZHgEMABxg05XVxmltTNC5M07o0Q7qhipf2dKJrPdRsQDXzh3UfCAAIgQCsdYjMEGZFKDiLQuFEKElFqG5KUdlcQvWCaprmJ5n3sRKqGkuIp2MzyRD69HePkT87hopFEAPOyix1XIrAu6wvFkIoBoiV2U2TcyGb7l5JqjJCc1OEhtY0lY1JbCHkjTfGaW2ATNk0uaFhRk9NUshNkcvlefNkgYrWJKkBhV9wiLOQ9yHvz8j5fgA2FAiLEEQIwxARIUDRvq6ZFeubcEWfBQshP3qerte7yftR/Cno7bacmRhjoG8AXzSnz0L3GRjtdXjRLF7OsbCjlMAPwA8gKBJamQsgFAfFmSXOSmHaUrMgRceGCN2/P0De1+S6x3lnMKD2ikX0j1gmcyFhIGTKymlZWs+/P3ySia4ctXi04iGBMIlglSBOhGAmz8wlZ+DlZRgWIYzg+05F45quYxP88LvnWXNtlJqaGG8fD1i9agEunuC/Hz1MRSZGEFjyBctd97dx84YGnuk6Q9pT+FZQGrAXK0mhDSgPq8K5ZZjLFQhdHGwMAd9ENXEMNefj7HsmoLPbY/XqKzHa8LU7X2P1dZUsXl7O8msyXLWygnvvOkjjwgjltSVMh3amdEUhQCRmQNsikThEk4xkJ+YC+H3vGMMjTjPqUMoNpdIRAkRKYpDAsGx+KXWVAecnCmy+oZ7JwFKSMcTSmoINufGGBibzjorGKP6F5oQCH5HyyigaBhkRssOiT3SdmwugutTxzqDPYP80YoMj1XUeDhgqBqz5dBWfWp9gdLSAOMeeAyMUipZCoUCxUGAiF/DKgRGcc+TzwcVuJ4CPUNcSBziSH/J5ZyggbT6gCurKUvSNhFLAx/dlb3NrAh+lP3l9FZ//QgW2MM3Pdw9zy6YGVl5ZjisGHD/qIyJkkopPLqggqoQ/dE5ThcEKWOeIKmPmzY8zNprbOzU1zcCgSF19Cpi6nIFfHy9wrGfarv2nfjY82L+/MiMnmttSOlEVuuHsNI88NsrRN6Z5+eVz3PalGs6ddSRDQ2RaMzwIW+6uZffT76JDgQttOot1bSvSqromcuwTXzl1YPldp3j7+JR94VR+7n0gnlDsuKWBjobQq6lS4fC42z42XPIfjz85EJRV6EiuJ6TRePTagKalUW7eXEMsEQGlKBZDdj01xNAxnwbtzRw2SjHgguBL918Zqam122urIj94dyDwfvdWEH79Vz3kcu+ToJAXmjKG376Ztf/64iTAD1/9TvPdH19U0XZg/6BtjSSMHziatMfIkYDvHeklXW1QwMSwowxNjTb4TjCeYiAs2NWfbojMazWdS/7uxI8AvrkpY5cvr7oY/DIGAG5dGWXp/AQt1WKMLtqxcbe2fWHLnid/Oi7DveOkvaiyoWA0KFEULiRaTCmUEqwD4ynGw0DSDSn58v0turtzcF1VpdmTL3rmZJdvT/Zm+fFr70lgLgVwZMCy7bpSNqzwJBmPey31kZ6+gcncylXVG08etzY7Na2SnqesBadmpFZq5sxwAvpC8Hg6Ye+6t8VMTozft+rq8icyFQlv2cdT9t0+y707Rz74Wj5rn2v3eOroUpR6C3mz3RTPTtgX9mZ3lFfU3ffk4+ddX8+oVJmoQRTOzTCAAqMVI9Z3VXWlcsdX6o0NJr93/c01X6WjWiv1ghO5h9uX/4CfHfYvi2feD+DEsMN/LUtzUnjs8SG2PbpGN+eyL799bHh6zdqqjYEt0ad7soERZzxjUFoROuGchMGyq6u8LXdk9MTY6Dc2fL7+AdpvVFsW/oxV85IcevYID+/L/fHB5P32nRtTnBvz6ezx1XPPLtPHXum3v/3d2KaVK5qf6O2NZV56esSNjGZFoUiWxNnw5+Vm8RI9debM2LbPrq/cVXNbu966+EWZ15SU6kycf9g5gnPy0Uezf34xR3V5hGRKiVp52CLGy1Tq39zyYG9bRcXoz7dtr9Tr/rTZXL0uY7Z9ucI0Nxd3fftfetuqq/QuRHtV6nmXKIlKuszjG8+PfmDwDwXgF4UHf52jpS6KyC9oa7AhxL0VVZxf/ydltx14o2ttx/L8gWtWcai7c2DTZzZXfK61lcEgMF7NehWOAtWVhodezjKRdX90NvT+r+n14b1Fhtq38mfXphgZt+FVy6J6YiRU6VL2btzxxDWwgYHbozAamqbmpJwbCcL/+W6WLyyPsOOlKf7frKUC7rkuNnN3kAw/+uuEJ3JQiQiPbim5uJH71iW4pkl9ZL//C6j6zkraIXFIAAAAAElFTkSuQmCC">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>New Quote</h1>
+    <p>Fill in the boxes, add a line for each thing you are quoting, then press
+       <strong>Fill the quote</strong>. Copy or download the result and hand it
+       to your AI to assign the quote number and log it.</p>
+  </header>
+
+  <form id="quoteForm">
+    <fieldset>
+      <legend>Your business</legend>
+      <p class="hint">These come from your saved branding. Fill them once; they
+        stay the same on every quote.</p>
+      <label>Business name<input name="business name"></label>
+      <label>Business tagline <span class="hint">(optional short line under your name)</span><input name="business tagline"></label>
+      <label>Business street address<input name="business street address"></label>
+      <label>Business city, state, and postal code<input name="business city, state, and postal code"></label>
+      <label>Business phone number<input name="business phone number"></label>
+      <label>Business email address<input name="business email address"></label>
+      <label>Your full name and title <span class="hint">(e.g. Jane Doe, Owner)</span><input name="sender full name and title"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quote details</legend>
+      <label>Quote number <span class="hint">(leave blank — your AI assigns the next one from the ledger)</span><input name="quote number" placeholder="assigned by your AI"></label>
+      <label>Today's date<input name="today's date"></label>
+      <label>Valid until date <span class="hint">(default: 30 days out)</span><input name="valid until date"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Who it is for</legend>
+      <label>Client full name<input name="client full name"></label>
+      <label>Client company name <span class="hint">(if any)</span><input name="client company name if any"></label>
+      <label>Client street address <span class="hint">(if known)</span><input name="client street address if known"></label>
+      <label>Client email address <span class="hint">(if known)</span><input name="client email address if known"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Line items</legend>
+      <p class="hint">One line per thing you are quoting. Line total is figured
+        automatically (quantity times price each). Per-unit job? Quantity is the
+        count (quantity 120, unit feet). Flat-fee job? Put quantity
+        <strong>1</strong>, unit <strong>job</strong>, and the flat price.
+        Hourly? Quantity is the number and unit is hours.</p>
+      <div class="items-head">
+        <span>Description</span>
+        <span>Quantity</span>
+        <span>Unit</span>
+        <span>Price each ($)</span>
+        <span>Line total</span>
+        <span></span>
+      </div>
+      <div id="itemRows"></div>
+      <button type="button" class="add-item" id="addItemBtn">+ Add a line item</button>
+
+      <div class="totals">
+        <div>Subtotal: <span id="subtotalView">$0.00</span></div>
+        <div>
+          <label style="display:inline; font-weight:600;">Sales tax rate (%)
+            <input id="taxRate" name="tax rate percent" style="width:90px; display:inline-block; text-align:right;" placeholder="0">
+          </label>
+          &nbsp; Tax: <span id="taxView">$0.00</span>
+        </div>
+        <div class="grand">Total: <span id="totalView">$0.00</span></div>
+        <div>
+          <label style="display:inline; font-weight:600;">Deposit
+            <select id="depositType" name="deposit type" style="width:105px; display:inline-block;">
+              <option value="none">None</option>
+              <option value="percent">Percent</option>
+              <option value="fixed">Fixed $</option>
+            </select>
+            <input id="depositValue" name="deposit value" style="width:90px; display:inline-block; text-align:right;" placeholder="0">
+          </label>
+          &nbsp; Deposit to start: <span id="depositView">$0.00</span>
+          &nbsp; Balance: <span id="balanceView">$0.00</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Terms</legend>
+      <label>When we can start <span class="hint">(the start window you have actually agreed to - leave blank if no date was discussed)</span><input name="start window" placeholder="We can start the week of September 22."></label>
+      <label>Terms and conditions <span class="hint">(payment schedule and what's included - the deposit line is figured above, no need to repeat the percentage)</span><textarea name="terms and conditions" placeholder="Balance on completion. Quote valid 30 days. Materials included."></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Exclusions and assumptions <span class="hint">— fill both, they decide who pays when a job goes sideways</span></legend>
+      <label>What this quote does not include <span class="hint">(one short plain line each: permits, disposal, utility marking, unforeseen conditions, anything the customer supplies)</span><textarea name="what this quote does not include" placeholder="Permit and permit fees - homeowner's&#10;Marking underground utilities&#10;Lawn and sprinkler repair in the work area&#10;Anything found under the existing slab"></textarea></label>
+      <label>What this price assumes <span class="hint">(the conditions the price is good under - if one turns out false, that is a change order)</span><textarea name="what this price assumes" placeholder="Truck access to the work area&#10;No ledge or rock in the excavation&#10;Work done in one visit, normal weekday hours&#10;Material prices as of today"></textarea></label>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="primary" id="fillBtn">Fill the quote</button>
+      <button type="button" class="ghost" id="copyBtn">Copy to clipboard</button>
+      <button type="button" class="ghost" id="downloadBtn">Download</button>
+      <span id="status"></span>
+    </div>
+  </form>
+
+  <h2 class="out">Your finished quote</h2>
+  <div id="output" aria-live="polite"></div>
+
+  <footer>
+    This page works offline. Nothing you type leaves your computer. Your AI
+    assigns the quote number, logs it to the ledger, and applies your branding
+    when it turns this into a printed quote.
+  </footer>
+</div>
+
+<script>
+// ---- Money helpers: work in whole cents to avoid rounding errors ----
+function toCents(dollarString) {
+  var n = parseFloat(String(dollarString).replace(/[^0-9.\-]/g, ""));
+  if (isNaN(n)) return 0;
+  return Math.round(n * 100);
+}
+// Clean any user-typed number the same way toCents cleans money: strip commas
+// and stray characters so "1,200" reads as 1200, not 1. Use for quantity and
+// the tax rate — never bare parseFloat on something the user types.
+function toNumber(str) {
+  var n = parseFloat(String(str).replace(/[^0-9.\-]/g, ""));
+  return isNaN(n) ? 0 : n;
+}
+function money(cents) {
+  var sign = cents < 0 ? "-" : "";
+  cents = Math.abs(cents);
+  var d = Math.floor(cents / 100);
+  var c = cents % 100;
+  return sign + d.toLocaleString("en-US") + "." + (c < 10 ? "0" + c : c);
+}
+
+// ---- Dynamic line-item rows ----
+var itemRows = document.getElementById("itemRows");
+
+function addItemRow(desc, qty, unit, price) {
+  var row = document.createElement("div");
+  row.className = "item-row";
+  row.innerHTML =
+    '<label><input class="li-desc" placeholder="e.g. Cedar privacy fence, installed"></label>' +
+    '<label><input class="li-qty" inputmode="decimal" placeholder="120"></label>' +
+    '<label><input class="li-unit" placeholder="feet"></label>' +
+    '<label><input class="li-price" inputmode="decimal" placeholder="40"></label>' +
+    '<div class="line-total">$0.00</div>' +
+    '<button type="button" class="remove" title="Remove this line">&times;</button>';
+  itemRows.appendChild(row);
+  if (desc) row.querySelector(".li-desc").value = desc;
+  if (qty) row.querySelector(".li-qty").value = qty;
+  if (unit) row.querySelector(".li-unit").value = unit;
+  if (price) row.querySelector(".li-price").value = price;
+
+  row.querySelector(".remove").addEventListener("click", function () {
+    row.parentNode.removeChild(row);
+    recalc();
+  });
+  row.querySelectorAll("input").forEach(function (el) {
+    el.addEventListener("input", recalc);
+  });
+  recalc();
+}
+
+// A produced quote belongs to the numbers that were on screen when Fill ran.
+// The moment anything changes, the shown text is stale, so it is cleared and
+// Copy/Download have to re-run the checks instead of exporting a quote the form
+// already knows is wrong.
+var quoteIsCurrent = false;
+
+function invalidateQuote() {
+  if (!quoteIsCurrent) return;
+  quoteIsCurrent = false;
+  document.getElementById("output").textContent = "";
+  document.getElementById("status").textContent =
+    "Something changed — press Fill the quote again to produce the updated version.";
+}
+
+// ---- Recalculate every line total and the grand total ----
+function recalc() {
+  invalidateQuote();
+  var subtotalCents = 0;
+  itemRows.querySelectorAll(".item-row").forEach(function (row) {
+    var qty = toNumber(row.querySelector(".li-qty").value);
+    var priceCents = toCents(row.querySelector(".li-price").value);
+    var lineCents = Math.round(qty * priceCents);
+    row.querySelector(".line-total").textContent = "$" + money(lineCents);
+    subtotalCents += lineCents;
+  });
+  var taxPct = toNumber(document.getElementById("taxRate").value);
+  var taxCents = Math.round(subtotalCents * (taxPct / 100));
+  var totalCents = subtotalCents + taxCents;
+
+  // Deposit: percentage or fixed dollars. An oversized deposit is a refusal,
+  // never a silent clamp to the total.
+  var depositType = document.getElementById("depositType").value;
+  var depositValue = document.getElementById("depositValue").value.trim();
+  var depositCents = 0;
+  var depositLabel = "";
+  var depositError = "";
+  if (depositType === "percent") {
+    var depositPct = toNumber(depositValue);
+    if (!depositValue || depositPct < 0 || depositPct > 100) {
+      depositError = "enter a deposit percentage from 0 to 100";
+    } else {
+      depositCents = Math.round(totalCents * (depositPct / 100));
+      depositLabel = depositPct + "%";
+    }
+  } else if (depositType === "fixed") {
+    if (!depositValue) {
+      depositError = "enter the fixed deposit amount";
+    } else {
+      depositCents = toCents(depositValue);
+      depositLabel = "fixed";
+      if (depositCents < 0) depositError = "the fixed deposit cannot be negative";
+      if (depositCents > totalCents) depositError = "the fixed deposit is larger than the quote total";
+    }
+  }
+  var balanceCents = totalCents - depositCents;
+
+  document.getElementById("subtotalView").textContent = "$" + money(subtotalCents);
+  document.getElementById("taxView").textContent = "$" + money(taxCents);
+  document.getElementById("totalView").textContent = "$" + money(totalCents);
+  document.getElementById("depositView").textContent = depositError ? "—" : "$" + money(depositCents);
+  document.getElementById("balanceView").textContent = depositError ? "—" : "$" + money(balanceCents);
+
+  return {
+    subtotalCents: subtotalCents, taxCents: taxCents, totalCents: totalCents,
+    taxPct: taxPct, depositType: depositType, depositLabel: depositLabel,
+    depositCents: depositCents, balanceCents: balanceCents,
+    depositError: depositError
+  };
+}
+
+document.getElementById("addItemBtn").addEventListener("click", function () { addItemRow(); });
+document.getElementById("taxRate").addEventListener("input", recalc);
+document.getElementById("depositType").addEventListener("change", recalc);
+document.getElementById("depositValue").addEventListener("input", recalc);
+// recalc() only watches the money fields. The header, client, and terms fields
+// are just as required, so any edit anywhere in the form invalidates a shown
+// quote — otherwise emptying "terms and conditions" after Fill leaves a
+// now-invalid quote sitting there ready to copy.
+document.getElementById("quoteForm").addEventListener("input", invalidateQuote);
+document.getElementById("quoteForm").addEventListener("change", invalidateQuote);
+addItemRow(); // start with one empty row
+
+// ---- Build the finished quote markdown ----
+function fillQuote() {
+  var form = document.getElementById("quoteForm");
+  function v(name) {
+    var el = form.querySelector('[name="' + name + '"]');
+    return el ? el.value.trim() : "";
+  }
+  var totals = recalc();
+
+  // header
+  var lines = [];
+  lines.push("# QUOTE");
+  lines.push("");
+  lines.push("**" + (v("business name") || "{{business name}}") + "**");
+  if (v("business tagline")) lines.push(v("business tagline"));
+  lines.push(v("business street address") + "  ·  " + v("business city, state, and postal code"));
+  lines.push(v("business phone number") + "  ·  " + v("business email address"));
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("**Quote number:** " + (v("quote number") || "(your AI assigns the next number from the ledger)"));
+  lines.push("**Date:** " + v("today's date"));
+  lines.push("**Valid until:** " + v("valid until date"));
+  lines.push("");
+  lines.push("**Prepared for:**");
+  lines.push(v("client full name"));
+  if (v("client company name if any")) lines.push(v("client company name if any"));
+  if (v("client street address if known")) lines.push(v("client street address if known"));
+  if (v("client email address if known")) lines.push(v("client email address if known"));
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("## What we are quoting");
+  lines.push("");
+  lines.push("| Description | Quantity | Price each | Line total |");
+  lines.push("| --- | ---: | ---: | ---: |");
+
+  // table cells: pipes and line breaks would break the table layout
+  function tableSafe(text) {
+    return text.replace(/\|/g, "\\|").replace(/\r?\n+/g, " — ");
+  }
+  var incompleteItems = 0;
+  var itemCount = 0;
+  itemRows.querySelectorAll(".item-row").forEach(function (row) {
+    var desc = row.querySelector(".li-desc").value.trim();
+    var qty = row.querySelector(".li-qty").value.trim();
+    var unit = row.querySelector(".li-unit").value.trim();
+    var priceText = row.querySelector(".li-price").value.trim();
+    var priceCents = toCents(priceText);
+    if (!desc && !qty && !unit && !priceText) return; // skip empty rows
+    itemCount++;
+    if (!desc || !qty || !unit || !priceText || toNumber(qty) <= 0 || priceCents < 0) incompleteItems++;
+    var lineCents = Math.round(toNumber(qty) * priceCents);
+    lines.push("| " + tableSafe(desc || "(describe this item)") + " | " +
+               tableSafe((qty || "0") + " " + (unit || "(unit missing)")) +
+               " | $" + money(priceCents) + " | $" + money(lineCents) + " |");
+  });
+
+  var requiredNames = [
+    "business name", "business street address", "business city, state, and postal code",
+    "business phone number", "business email address", "sender full name and title",
+    "today's date", "valid until date", "client full name", "terms and conditions",
+    "what this quote does not include", "what this price assumes"
+  ];
+  var missingRequired = requiredNames.filter(function (name) { return !v(name); });
+  var refusalReasons = [];
+  if (!itemCount) refusalReasons.push("add at least one line item");
+  if (incompleteItems) refusalReasons.push(incompleteItems + " line item(s) need a description, positive quantity, unit, and price");
+  if (missingRequired.length) refusalReasons.push("fill " + missingRequired.join(", "));
+  if (totals.depositError) refusalReasons.push(totals.depositError);
+  if (refusalReasons.length) {
+    quoteIsCurrent = false;
+    document.getElementById("output").textContent = "";
+    document.getElementById("status").textContent =
+      "Quote not produced — " + refusalReasons.join("; ") + ".";
+    return "";
+  }
+
+  lines.push("|  |  | **Subtotal** | **$" + money(totals.subtotalCents) + "** |");
+  if (totals.taxPct > 0) {
+    lines.push("|  |  | Sales tax (" + totals.taxPct + "%) | $" + money(totals.taxCents) + " |");
+  }
+  lines.push("|  |  | **Total** | **$" + money(totals.totalCents) + "** |");
+  lines.push("");
+  if (totals.depositType !== "none" && totals.depositCents > 0) {
+    var depositNote = totals.depositType === "percent"
+      ? "Deposit to start (" + totals.depositLabel + ")"
+      : "Fixed deposit to start";
+    lines.push("**" + depositNote + ": $" + money(totals.depositCents) + "**");
+    lines.push("");
+    lines.push("Balance on completion: $" + money(totals.balanceCents));
+    lines.push("");
+  }
+  if (v("start window")) {
+    lines.push(v("start window"));
+    lines.push("");
+  }
+  lines.push("---");
+  lines.push("");
+  lines.push("## Terms");
+  lines.push("");
+  lines.push(v("terms and conditions") || "(your terms — payment schedule, what's included)");
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("## What this quote does not include");
+  lines.push("");
+  lines.push(v("what this quote does not include") ||
+             "(NOT FILLED IN — tell your AI what this price does not cover: permits, disposal, utility marking, unforeseen conditions, customer-supplied materials)");
+  lines.push("");
+  lines.push("## What this price assumes");
+  lines.push("");
+  lines.push(v("what this price assumes") ||
+             "(NOT FILLED IN — tell your AI the conditions this price is good under: site access, ground conditions, one visit, today's material prices)");
+  lines.push("");
+  lines.push("If something on this list turns out differently once we are on site, we will come back to you with the change in writing before doing the work — the price above does not move on its own.");
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("This quote is valid until **" + v("valid until date") + "**. To accept, reply to this quote or contact us at " + v("business phone number") + " or " + v("business email address") + ".");
+  lines.push("");
+  lines.push("Thank you for the opportunity to work with you.");
+  lines.push("");
+  lines.push(v("sender full name and title"));
+  lines.push(v("business name"));
+
+  var out = lines.join("\n");
+  quoteIsCurrent = true;
+  document.getElementById("output").textContent = out;
+  document.getElementById("status").textContent =
+    "Filled. Subtotal $" + money(totals.subtotalCents) +
+    ", tax $" + money(totals.taxCents) +
+    ", total $" + money(totals.totalCents) +
+    ". Hand this to your AI: it still checks the named price source, whether the price applies, and every service question before numbering.";
+  return out;
+}
+
+// Export only what the checks currently pass. Trusting whatever text happens to
+// be in #output is how a superseded or invalidated quote gets copied out.
+function currentText() {
+  if (quoteIsCurrent) {
+    var t = document.getElementById("output").textContent;
+    if (t && t.length) return t;
+  }
+  return fillQuote();
+}
+
+document.getElementById("fillBtn").addEventListener("click", fillQuote);
+
+document.getElementById("copyBtn").addEventListener("click", function () {
+  var text = currentText();
+  if (!text) return;
+  var status = document.getElementById("status");
+  function fallback() {
+    var ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); status.textContent = "Copied."; }
+    catch (e) { status.textContent = "Could not copy — select the text and copy by hand."; }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { status.textContent = "Copied."; }, fallback);
+  } else { fallback(); }
+});
+
+document.getElementById("downloadBtn").addEventListener("click", function () {
+  var text = currentText();
+  if (!text) return;
+  var blob = new Blob([text], { type: "text/plain" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "quote.txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById("status").textContent = "Downloaded.";
+});
+</script>
+</body>
+</html>
